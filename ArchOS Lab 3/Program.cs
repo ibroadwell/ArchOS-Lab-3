@@ -4,21 +4,21 @@ using static ArchOS.MethodsForLab3;
 
 ProcessManager manager = new ProcessManager();
 int[,] intProcesses = { { 0, 3 }, { 2, 6 }, { 5, 5 }, { 6, 3 }, { 8, 6 }, { 9, 2 }, { 10, 6 } };
-for (int i = 0; i < intProcesses.GetLength(0); i++)
+DisplayValues(intProcesses, 0);
+DisplayValues(intProcesses, 1);
+DisplayValues(intProcesses, 3);
+DisplayValues(intProcesses, 4);
+DisplayValues(intProcesses, 6);
+
+
+void DisplayValues(int[,] values, int slice)
 {
-    ProcessRR process = new ProcessRR(intProcesses[i, 0], intProcesses[i, 1]);
-    manager.AddProcess(process);
+    manager.RemoveAll();
+    for (int i = 0; i < values.GetLength(0); i++)
+    {
+        ProcessRR process = new ProcessRR(values[i, 0], values[i, 1]);
+        manager.AddProcess(process);
+    }
+    if (slice <= 0) manager.DisplayTableRR(1000000);
+    else manager.DisplayTableRR(slice);
 }
-manager.DisplayTableRR(100000000);
-
-manager.RemoveAll();
-
-int[,] intProcesses2 = { { 0, 3 }, { 2, 6 }, { 4, 4 }, { 6, 5 }, { 8, 2 } };
-
-for (int i = 0; i < intProcesses2.GetLength(0); i++)
-{
-    ProcessRR process = new ProcessRR(intProcesses2[i, 0], intProcesses2[i, 1]);
-    manager.AddProcess(process);
-}
-manager.DisplayTableRR(4);
-
