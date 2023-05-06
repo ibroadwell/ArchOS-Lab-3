@@ -197,6 +197,7 @@ namespace ArchOS
                         List<int> temp = queue.ToList();
                         temp.Remove(current);
                         queue = new Queue<int>(temp);
+                        Visits = 0;
                     }
                     counter++;
                 }
