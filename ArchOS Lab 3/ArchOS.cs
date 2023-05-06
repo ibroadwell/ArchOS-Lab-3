@@ -43,7 +43,7 @@ namespace ArchOS
             public void DisplayTable()
             {
                 Console.WriteLine("{0,3} | {1,3} | {2,3}", "P", "Ta", "Ts");
-                foreach (Process pProcess in Processes) 
+                foreach (Process pProcess in Processes)
                 {
                     Console.WriteLine("{0,3} | {1,3} | {2,3}", LetterForNumber(pProcess.ID), pProcess._aTime, pProcess._sTime);
                 }
@@ -86,7 +86,7 @@ namespace ArchOS
                             Console.Write("  |");
                         }
                     }
-                    
+
                     if (pProcess._aTime != currentStart)
                     {
                         for (int i = pProcess._aTime; i < currentStart; i++)
@@ -103,7 +103,7 @@ namespace ArchOS
                         Console.Write("  |");
                     }
                     currentStart = finishTime;
-                    
+
                     Console.WriteLine();
                 }
             }
@@ -121,7 +121,7 @@ namespace ArchOS
                     {
                         result.Add(null);
                     }
-                    
+
                 }
                 return result.ToArray();
             }
@@ -165,10 +165,50 @@ namespace ArchOS
                 }
                 return -1;
             }
+            public void CreateDiagramRepresentation(out Dictionary<int,List<bool>> DiagramRepresentation, List<ProcessRR> Processes)
+            {
+                DiagramRepresentation = new Dictionary<int, List<bool>>();
+                foreach (ProcessRR p in Processes)
+                {
+                    DiagramRepresentation.Add(p.ID, new List<bool>());
+                }
+            }
+            public void AddToDiagramRepresentation(ref Dictionary<int,List<bool>> DiagramRepresentation, int id)
+            {
+                foreach(int Key in DiagramRepresentation.Keys)
+                {
+                    if (Key == id) DiagramRepresentation[Key].Add(true);
+                    else DiagramRepresentation[Key].Add(false);
+                }
+            }
+            public void DisplayGraphHeaders(ref Dictionary<int, List<bool>> DiagramRepresentation)
+            {
+                string Output = "\n\nP |";
+                for (int i = 1; i <= DiagramRepresentation.Values.First().Count(); i++)
+                {
+                    Output += $"{i.ToString().PadLeft(2)}|";
+                }
+                Console.WriteLine(Output);
+            }
+            public void DisplayGraph(ref Dictionary<int, List<bool>> DiagramRepresentation)
+            {
+                DisplayGraphHeaders(ref DiagramRepresentation);
+                foreach (int Header in DiagramRepresentation.Keys)
+                {
+                    string Output = $"{LetterForNumber(Header)} |";
+                    foreach(bool Value in DiagramRepresentation[Header])
+                    {
+                        if (Value) Output += "[]|";
+                        else Output += "  |";
+                    }
+                    Console.WriteLine(Output);
+                }
+            }
 
             public void DisplayTableRR(int qSlice)
             {
                 List<ProcessRR> activeProcesses = new List<ProcessRR>(Processes.Cast<ProcessRR>());
+                CreateDiagramRepresentation(out Dictionary<int, List<bool>> DiagramRepresentation, activeProcesses);
                 int counter = 0;
                 int Visits = 0;
                 Queue<int> queue = new Queue<int>();
@@ -182,6 +222,7 @@ namespace ArchOS
                         continue;
                     }
                     Visits++;
+                    AddToDiagramRepresentation(ref DiagramRepresentation, current);
                     if (Visits == qSlice)
                     {
                         current = queue.Dequeue();
@@ -222,6 +263,7 @@ namespace ArchOS
                 meanTurnaroundTime = meanTurnaroundTime / Processes.Count;
                 meanNormalisedTurnaroundTime = meanNormalisedTurnaroundTime / Processes.Count;
                 Console.WriteLine("Mean|     |     |     | {0,6:N3} | {1,6:N3}", meanTurnaroundTime, meanNormalisedTurnaroundTime);
+                DisplayGraph(ref DiagramRepresentation);
             }
 
             public string LetterForNumber(int pNum)
