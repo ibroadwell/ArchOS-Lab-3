@@ -158,7 +158,7 @@ namespace ArchOS
                     //Console.WriteLine($"{LetterForNumber(pProcess.ID)} || {currentState} || {pProcess._aTime}");
                     if (currentState == pProcess._aTime)
                     {
-                        Console.WriteLine($"New process {LetterForNumber(pProcess.ID)} || {currentState}");
+                        //Console.WriteLine($"New process {LetterForNumber(pProcess.ID)} || {currentState}");
                         pProcesses.Enqueue(pProcess.ID);
                         return pProcess.ID;
                     }
@@ -229,7 +229,7 @@ namespace ArchOS
                         queue.Enqueue(current);
                         Visits = 0;
                     }
-                    Console.WriteLine($"{LetterForNumber(current)} || {counter} || {Visits}");
+                    //Console.WriteLine($"{LetterForNumber(current)} || {counter} || {Visits}");
 
                     activeProcesses[current].timeRemaining--;
                     if (activeProcesses[current].timeRemaining <= 0)

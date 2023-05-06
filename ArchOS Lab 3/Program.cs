@@ -6,14 +6,10 @@ ProcessManager manager = new ProcessManager();
 int[,] intProcesses = { { 0, 3 }, { 2, 6 }, { 5, 5 }, { 6, 3 }, { 8, 6 }, { 9, 2 }, { 10, 6 } };
 for (int i = 0; i < intProcesses.GetLength(0); i++)
 {
-    Process process = new Process(intProcesses[i, 0], intProcesses[i, 1]);
+    ProcessRR process = new ProcessRR(intProcesses[i, 0], intProcesses[i, 1]);
     manager.AddProcess(process);
 }
-manager.DisplayTable();
-Console.WriteLine();
-manager.DisplayFullTable();
-Console.WriteLine();
-manager.DisplayGanttChart();
+manager.DisplayTableRR(100000000);
 
 manager.RemoveAll();
 
