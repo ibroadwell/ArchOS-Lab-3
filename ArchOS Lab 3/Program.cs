@@ -1,5 +1,4 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using ArchOS;
 using static ArchOS.MethodsForLab3;
 
 ProcessManager manager = new ProcessManager();
@@ -22,3 +21,6 @@ void DisplayValues(int[,] values, int slice)
     if (slice <= 0) manager.DisplayTableRR(1000000);
     else manager.DisplayTableRR(slice);
 }
+
+
+
