@@ -20,7 +20,6 @@ namespace ArchOS
                 Processes = new List<Process>();
             }
 
-
             private static int _nextID = 0;
 
             public int nextID
@@ -29,7 +28,7 @@ namespace ArchOS
             }
             public void AddProcess(Process pProcess)
             {
-                pProcess.ID = _nextID;
+                pProcess._id = _nextID;
                 Processes.Add(pProcess);
                 _nextID++;
             }
@@ -39,164 +38,63 @@ namespace ArchOS
                 Processes.Clear();
                 _nextID = 0;
             }
-
-            public void DisplayTable()
+            public bool NoActiveProcesses(List<Process> pProcess)
             {
-                Console.WriteLine("{0,3} | {1,3} | {2,3}", "P", "Ta", "Ts");
-                foreach (Process pProcess in Processes)
+                foreach (Process process in pProcess)
                 {
-                    Console.WriteLine("{0,3} | {1,3} | {2,3}", LetterForNumber(pProcess.ID), pProcess._aTime, pProcess._sTime);
-                }
-            }
-
-            public void DisplayFullTable()
-            {
-                Console.WriteLine("{0,3} | {1,3} | {2,3} | {3,3} | {4,6} | {5,6}", "P", "Ta", "Ts", "Tf", "Tt", "Ttn");
-                int currentStart = 0;
-                double meanTurnaroundTime = 0;
-                double meanNormalisedTurnaroundTime = 0;
-                foreach (Process pProcess in Processes)
-                {
-                    int finishTime = (currentStart + pProcess._sTime);
-                    int turnaroundTime = finishTime - pProcess._aTime;
-                    double normalisedTurnaroundTime = (double)turnaroundTime / (double)pProcess._sTime;
-                    meanTurnaroundTime += turnaroundTime;
-                    meanNormalisedTurnaroundTime += normalisedTurnaroundTime;
-                    Console.WriteLine("{0,3} | {1,3} | {2,3} | {3,3} | {4,6} | {5,6:N3}", LetterForNumber(pProcess.ID), pProcess._aTime, pProcess._sTime, finishTime, turnaroundTime, normalisedTurnaroundTime);
-                    currentStart = finishTime;
-                }
-                meanTurnaroundTime = meanTurnaroundTime / Processes.Count;
-                meanNormalisedTurnaroundTime = meanNormalisedTurnaroundTime / Processes.Count;
-                Console.WriteLine("Mean|     |     |     | {0,6:N3} | {1,6:N3}", meanTurnaroundTime, meanNormalisedTurnaroundTime);
-            }
-
-            public void DisplayGanttChart()
-            {
-                int counter = 0;
-                Console.WriteLine("P |__|__|__|__|__5__|__|__|__|__10_|__|__|__|__15_|__|__|__|__20_|__|__|__|__25_|__|__|__|__30_|__|__|__|__35");
-                int currentStart = 0;
-                foreach (Process pProcess in Processes)
-                {
-                    int finishTime = (currentStart + pProcess._sTime);
-                    Console.Write(LetterForNumber(pProcess.ID) + " |");
-                    if (currentStart != 0)
-                    {
-                        for (int i = 0; i < pProcess._aTime; i++)
-                        {
-                            Console.Write("  |");
-                        }
-                    }
-
-                    if (pProcess._aTime != currentStart)
-                    {
-                        for (int i = pProcess._aTime; i < currentStart; i++)
-                        {
-                            Console.Write("--|");
-                        }
-                    }
-                    for (int i = currentStart; i < finishTime; i++)
-                    {
-                        Console.Write("[]|");
-                    }
-                    for (int i = finishTime; i < 35; i++)
-                    {
-                        Console.Write("  |");
-                    }
-                    currentStart = finishTime;
-
-                    Console.WriteLine();
-                }
-            }
-
-            public ProcessRR[] ActiveProcesses(int currentState)
-            {
-                List<ProcessRR> result = new List<ProcessRR>();
-                foreach (ProcessRR pProcess in Processes)
-                {
-                    if (currentState >= pProcess._aTime && pProcess.timeFinished == -1)
-                    {
-                        result.Add(pProcess);
-                    }
-                    else
-                    {
-                        result.Add(null);
-                    }
-
-                }
-                return result.ToArray();
-            }
-
-            public int ActiveProcessesLength(ProcessRR[] pProcess)
-            {
-                int count = 0;
-                foreach (ProcessRR p in pProcess)
-                {
-                    if (p != null)
-                    {
-                        count++;
-                    }
-
-                }
-                return count;
-            }
-
-            public bool NoActiveProcesses(List<ProcessRR> pProcess)
-            {
-                foreach (ProcessRR process in pProcess)
-                {
-                    if (process.timeFinished == -1)
+                    if (process._finishTime == -1)
                     {
                         return false;
                     }
                 }
                 return true;
             }
-            public int EnqueueNewActiveProcess(ref Queue<int> pProcesses, List<ProcessRR> processRRs, int currentState)
+            public int EnqueueNewActiveProcess(ref Queue<int> pProcesses, List<Process> pProcessRRs, int pCurrentState)
             {
-                foreach (ProcessRR pProcess in processRRs)
+                foreach (Process pProcess in pProcessRRs)
                 {
                     //Console.WriteLine($"{LetterForNumber(pProcess.ID)} || {currentState} || {pProcess._aTime}");
-                    if (currentState == pProcess._aTime)
+                    if (pCurrentState == pProcess._arrivalTime)
                     {
                         //Console.WriteLine($"New process {LetterForNumber(pProcess.ID)} || {currentState}");
-                        pProcesses.Enqueue(pProcess.ID);
-                        return pProcess.ID;
+                        pProcesses.Enqueue(pProcess._id);
+                        return pProcess._id;
                     }
                 }
                 return -1;
             }
-            public void CreateDiagramRepresentation(out Dictionary<int,List<bool>> DiagramRepresentation, List<ProcessRR> Processes)
+            public void CreateDiagramRepresentation(out Dictionary<int,List<bool>> pDiagramRepresentation, List<Process> pProcessRRs)
             {
-                DiagramRepresentation = new Dictionary<int, List<bool>>();
-                foreach (ProcessRR p in Processes)
+                pDiagramRepresentation = new Dictionary<int, List<bool>>();
+                foreach (Process p in pProcessRRs)
                 {
-                    DiagramRepresentation.Add(p.ID, new List<bool>());
+                    pDiagramRepresentation.Add(p._id, new List<bool>());
                 }
             }
-            public void AddToDiagramRepresentation(ref Dictionary<int,List<bool>> DiagramRepresentation, int id)
+            public void AddToDiagramRepresentation(ref Dictionary<int,List<bool>> pDiagramRepresentation, int pId)
             {
-                foreach(int Key in DiagramRepresentation.Keys)
+                foreach(int Key in pDiagramRepresentation.Keys)
                 {
-                    if (Key == id) DiagramRepresentation[Key].Add(true);
-                    else DiagramRepresentation[Key].Add(false);
+                    if (Key == pId) pDiagramRepresentation[Key].Add(true);
+                    else pDiagramRepresentation[Key].Add(false);
                 }
             }
-            public void DisplayGraphHeaders(ref Dictionary<int, List<bool>> DiagramRepresentation)
+            public void DisplayGraphHeaders(ref Dictionary<int, List<bool>> pDiagramRepresentation)
             {
                 string Output = "\n\nP |";
-                for (int i = 1; i <= DiagramRepresentation.Values.First().Count(); i++)
+                for (int i = 1; i <= pDiagramRepresentation.Values.First().Count(); i++)
                 {
                     Output += $"{i.ToString().PadLeft(2)}|";
                 }
                 Console.WriteLine(Output);
             }
-            public void DisplayGraph(ref Dictionary<int, List<bool>> DiagramRepresentation)
+            public void DisplayGraph(ref Dictionary<int, List<bool>> pDiagramRepresentation)
             {
-                DisplayGraphHeaders(ref DiagramRepresentation);
-                foreach (int Header in DiagramRepresentation.Keys)
+                DisplayGraphHeaders(ref pDiagramRepresentation);
+                foreach (int Header in pDiagramRepresentation.Keys)
                 {
                     string Output = $"{LetterForNumber(Header)} |";
-                    foreach(bool Value in DiagramRepresentation[Header])
+                    foreach(bool Value in pDiagramRepresentation[Header])
                     {
                         if (Value) Output += "[]|";
                         else Output += "  |";
@@ -207,38 +105,38 @@ namespace ArchOS
 
             public void DisplayTableRR(int qSlice)
             {
-                List<ProcessRR> activeProcesses = new List<ProcessRR>(Processes.Cast<ProcessRR>());
-                CreateDiagramRepresentation(out Dictionary<int, List<bool>> DiagramRepresentation, activeProcesses);
+                List<Process> activeProcesses = new List<Process>(Processes.Cast<Process>());
+                CreateDiagramRepresentation(out Dictionary<int, List<bool>> diagramRepresentation, activeProcesses);
                 int counter = 0;
-                int Visits = 0;
+                int visits = 0;
                 Queue<int> queue = new Queue<int>();
                 do
                 {
-                    int NewProcess = EnqueueNewActiveProcess(ref queue, activeProcesses, counter);
+                    int newProcess = EnqueueNewActiveProcess(ref queue, activeProcesses, counter);
                     int current = queue.Peek();
-                    if (NewProcess == current)
+                    if (newProcess == current)
                     {
                         counter++;
                         continue;
                     }
-                    Visits++;
-                    AddToDiagramRepresentation(ref DiagramRepresentation, current);
-                    if (Visits == qSlice)
+                    visits++;
+                    AddToDiagramRepresentation(ref diagramRepresentation, current);
+                    if (visits == qSlice)
                     {
                         current = queue.Dequeue();
                         queue.Enqueue(current);
-                        Visits = 0;
+                        visits = 0;
                     }
                     //Console.WriteLine($"{LetterForNumber(current)} || {counter} || {Visits}");
 
-                    activeProcesses[current].timeRemaining--;
-                    if (activeProcesses[current].timeRemaining <= 0)
+                    activeProcesses[current]._timeRemaining--;
+                    if (activeProcesses[current]._timeRemaining <= 0)
                     {
-                        activeProcesses[current].timeFinished = counter;
+                        activeProcesses[current]._finishTime = counter;
                         List<int> temp = queue.ToList();
                         temp.Remove(current);
                         queue = new Queue<int>(temp);
-                        Visits = 0;
+                        visits = 0;
                     }
                     counter++;
                 }
@@ -250,51 +148,42 @@ namespace ArchOS
                 int currentStart = 0;
                 double meanTurnaroundTime = 0;
                 double meanNormalisedTurnaroundTime = 0;
-                foreach (ProcessRR pProcess in Processes)
+                foreach (Process pProcess in Processes)
                 {
-                    int finishTime = pProcess.timeFinished;
-                    int turnaroundTime = finishTime - pProcess._aTime;
-                    double normalisedTurnaroundTime = (double)turnaroundTime / (double)pProcess._sTime;
+                    int finishTime = pProcess._finishTime;
+                    int turnaroundTime = finishTime - pProcess._arrivalTime;
+                    double normalisedTurnaroundTime = (double)turnaroundTime / (double)pProcess._startTime;
                     meanTurnaroundTime += turnaroundTime;
                     meanNormalisedTurnaroundTime += normalisedTurnaroundTime;
-                    Console.WriteLine("{0,3} | {1,3} | {2,3} | {3,3} | {4,6} | {5,6:N3}", LetterForNumber(pProcess.ID), pProcess._aTime, pProcess._sTime, finishTime, turnaroundTime, normalisedTurnaroundTime);
+                    Console.WriteLine("{0,3} | {1,3} | {2,3} | {3,3} | {4,6} | {5,6:N3}", LetterForNumber(pProcess._id), pProcess._arrivalTime, pProcess._startTime, finishTime, turnaroundTime, normalisedTurnaroundTime);
                     currentStart = finishTime;
                 }
                 meanTurnaroundTime = meanTurnaroundTime / Processes.Count;
                 meanNormalisedTurnaroundTime = meanNormalisedTurnaroundTime / Processes.Count;
                 Console.WriteLine("Mean|     |     |     | {0,6:N3} | {1,6:N3}", meanTurnaroundTime, meanNormalisedTurnaroundTime);
-                DisplayGraph(ref DiagramRepresentation);
+                DisplayGraph(ref diagramRepresentation);
             }
 
             public string LetterForNumber(int pNum)
-
             {
                 string strAlpha = ((char)(pNum + 65)).ToString();
                 return strAlpha; 
             }
         }
+
         public class Process
         {
-            public int ID;
-            public int _aTime;
-            public int _sTime;
+            public int _id;
+            public int _arrivalTime { get; private set; }
+            public int _startTime { get; private set; }
+            public int _timeRemaining;
+            public int _finishTime = -1;
 
-            public Process(int aTime, int sTime)
+            public Process (int pArrivalTime, int pStartTime)
             {
-                _aTime = aTime;
-                _sTime = sTime;
-            }
-
-        }
-
-        public class ProcessRR : Process
-        {
-            public int timeRemaining;
-            public int timeFinished = -1;
-
-            public ProcessRR (int aTime, int sTime) : base (aTime, sTime)
-            {
-                timeRemaining = sTime;
+                _arrivalTime = pArrivalTime;
+                _startTime = pStartTime;
+                _timeRemaining = pStartTime;
             }
         }
     }

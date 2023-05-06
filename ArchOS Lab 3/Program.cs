@@ -16,7 +16,7 @@ void DisplayValues(int[,] values, int slice)
     manager.RemoveAll();
     for (int i = 0; i < values.GetLength(0); i++)
     {
-        ProcessRR process = new ProcessRR(values[i, 0], values[i, 1]);
+        Process process = new Process(values[i, 0], values[i, 1]);
         manager.AddProcess(process);
     }
     if (slice <= 0) manager.DisplayTableRR(1000000);
