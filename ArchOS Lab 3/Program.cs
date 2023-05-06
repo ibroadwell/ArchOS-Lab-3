@@ -24,4 +24,5 @@ for (int i = 0; i < intProcesses2.GetLength(0); i++)
     ProcessRR process = new ProcessRR(intProcesses2[i, 0], intProcesses2[i, 1]);
     manager.AddProcess(process);
 }
-manager.DisplayTableRR(1);
+manager.DisplayTableRR(4);
+

@@ -140,55 +140,69 @@ namespace ArchOS
                 return count;
             }
 
-            public bool NoActiveProcesses(ProcessRR[] pProcess)
+            public bool NoActiveProcesses(List<ProcessRR> pProcess)
             {
                 foreach (ProcessRR process in pProcess)
                 {
-                    if (process != null)
+                    if (process.timeFinished == -1)
                     {
                         return false;
                     }
                 }
                 return true;
             }
-            public void DisplayTableRR(int qSlice)
+            public int EnqueueNewActiveProcess(ref Queue<int> pProcesses, List<ProcessRR> processRRs, int currentState)
             {
-                int counter = 0;
-                ProcessRR[] activeProcesses = ActiveProcesses(counter);
-                Queue<int> queue = new Queue<int>();
-                for (int i = 0; i < activeProcesses.Length; i++)
+                foreach (ProcessRR pProcess in processRRs)
                 {
-                    if (activeProcesses[i] != null)
+                    //Console.WriteLine($"{LetterForNumber(pProcess.ID)} || {currentState} || {pProcess._aTime}");
+                    if (currentState == pProcess._aTime)
                     {
-                        queue.Enqueue(activeProcesses[i].ID);
+                        Console.WriteLine($"New process {LetterForNumber(pProcess.ID)} || {currentState}");
+                        pProcesses.Enqueue(pProcess.ID);
+                        return pProcess.ID;
                     }
                 }
+                return -1;
+            }
+
+            public void DisplayTableRR(int qSlice)
+            {
+                List<ProcessRR> activeProcesses = new List<ProcessRR>(Processes.Cast<ProcessRR>());
+                int counter = 0;
+                int Visits = 0;
+                Queue<int> queue = new Queue<int>();
                 do
                 {
-                    for (int p = queue.Count - 1; p >= 0; p--)
+                    int NewProcess = EnqueueNewActiveProcess(ref queue, activeProcesses, counter);
+                    int current = queue.Peek();
+                    if (NewProcess == current)
                     {
-                        ProcessRR process = activeProcesses[queue.First()];
-                        if (process == null)
-                        { 
-                            continue;
-                        }
-                        for (int i = 0; i < qSlice && i < activeProcesses[queue.First()].timeRemaining; i++)
-                        {
-                            activeProcesses[queue.First()].timeRemaining--;
-                            counter++;
-                            Console.Write( LetterForNumber(activeProcesses[queue.First()].ID));
-                            if (activeProcesses[queue.First()].timeRemaining == 0)
-                            {
-                                activeProcesses[queue.First()].timeFinished = counter;
+                        counter++;
+                        continue;
+                    }
+                    Visits++;
+                    if (Visits == qSlice)
+                    {
+                        current = queue.Dequeue();
+                        queue.Enqueue(current);
+                        Visits = 0;
+                    }
+                    Console.WriteLine($"{LetterForNumber(current)} || {counter} || {Visits}");
 
-                                
-                            }
-                            activeProcesses = ActiveProcesses(counter);
-                        }
-
-                    }    
+                    activeProcesses[current].timeRemaining--;
+                    if (activeProcesses[current].timeRemaining <= 0)
+                    {
+                        activeProcesses[current].timeFinished = counter;
+                        List<int> temp = queue.ToList();
+                        temp.Remove(current);
+                        queue = new Queue<int>(temp);
+                    }
+                    counter++;
                 }
                 while (!NoActiveProcesses(activeProcesses));
+
+                //
                 Console.WriteLine();
                 Console.WriteLine("{0,3} | {1,3} | {2,3} | {3,3} | {4,6} | {5,6}", "P", "Ta", "Ts", "Tf", "Tt", "Ttn");
                 int currentStart = 0;
